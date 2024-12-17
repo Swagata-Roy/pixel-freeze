@@ -34,7 +34,5 @@ Note: By default Element Screenshot mode is selected.
 ## 🤝 Contributing
 New features are always welcome, and any contributions that improve the user experience are encouraged.
 
-Capture Every Pixel, Perfectly! 📸
-
 ## 📜 License
 [Apache 2.0 © 2024 Swagata Roy](./LICENSE)
