@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Pixel Freeze",
+  "version": "1.1",
+  "author": "Swagata Roy",
+  "description": "Capture screenshots of specific elements in a web page. Also, captures full window screenshots.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "debugger",
+    "commands",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "default_title": "Pixel Freeze",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"]
+  }],
+  "commands": {
+    "capture_screenshot": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+X",
+        "windows": "Ctrl+Shift+X",
+        "mac": "MacCtrl+Shift+X",
+        "chromeos": "Ctrl+Shift+X",
+        "linux": "Ctrl+Shift+X"
+      },
+      "description": "Capture screenshot based on current mode"
+    }
+  }
+}
