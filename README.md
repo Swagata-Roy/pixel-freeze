@@ -1,6 +1,6 @@
 # Pixel Freeze 🖥️📸
 
-Pixel Freeze is a powerful, lightweight Chrome and Edge browser extension that captures node screenshots(both modes) with unparalleled flexibility and ease of use.
+Pixel Freeze is a powerful, lightweight Chrome and Edge browser extension that captures node screenshots with unparalleled flexibility and ease of use.
 
 ## 🌟 Key Features
 
