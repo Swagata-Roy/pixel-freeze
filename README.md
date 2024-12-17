@@ -12,7 +12,7 @@ Pixel Freeze is a powerful, lightweight Chrome and Edge browser extension that c
 - Quick keyboard shortcut (Ctrl+Shift+X)
 - Simple toggle interface
 - Instant screenshot saving
-- Easy to use interface
+- Easy to use interface 
 
 ## 💡 How to Use
 
@@ -23,7 +23,7 @@ Pixel Freeze is a powerful, lightweight Chrome and Edge browser extension that c
 4. Click and drag to select the desired area
 5. Screenshot saves automatically
 
-### Full Page Screenshot
+### Window Screenshot
 1. Click the Pixel Freeze icon
 2. Toggle to "Full Page Screenshot" mode
 3. Press Ctrl+Shift+X
