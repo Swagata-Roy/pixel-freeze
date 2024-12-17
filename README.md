@@ -32,7 +32,7 @@ Pixel Freeze is a powerful, lightweight Chrome and Edge browser extension that c
 Note: By default Element Screenshot mode is selected.
 
 ## 🤝 Contributing
-Contributions are welcome! New features are always welcome. Please feel free to fork the repository and submit pull requests.
+New features are always welcome, and any contributions that improve the user experience are encouraged.
 
 Capture Every Pixel, Perfectly! 📸
 
