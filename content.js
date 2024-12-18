@@ -12,7 +12,7 @@
     }
 
     function updateCaptureMode(mode) {
-        // Ensure selection overlay is hidden if in full page mode
+        // Ensure selection overlay is hidden if in window screenshot mode
         if (mode === 'fullPage') {
             if (selectionOverlay) {
                 selectionOverlay.style.display = 'none';
