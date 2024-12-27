@@ -15,6 +15,10 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "web_accessible_resources": [{
+    "resources": ["screenshot-helper.html"],
+    "matches": ["<all_urls>"]
+  }],
   "action": {
     "default_icon": {
       "16": "images/icon16.png",
@@ -25,7 +29,8 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],

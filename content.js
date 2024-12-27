@@ -2,24 +2,115 @@
     let captureMode = 'elementCapture'; // Default mode
 
     function initializeCaptureMode() {
-        // Retrieve capture mode from storage when the content script loads
         chrome.storage.sync.get('captureMode', (data) => {
             captureMode = data.captureMode || 'elementCapture';
-
-            // Update UI or perform any necessary initialization based on the mode
             updateCaptureMode(captureMode);
         });
     }
 
     function updateCaptureMode(mode) {
-        // Ensure selection overlay is hidden if in window screenshot mode
-        if (mode === 'fullPage') {
+        // Ensure selection overlay is hidden if not in element mode
+        if (mode !== 'elementCapture') {
             if (selectionOverlay) {
                 selectionOverlay.style.display = 'none';
             }
             if (selectionRect) {
                 selectionRect.style.display = 'none';
             }
+        }
+    }
+
+    async function captureFullPageScreenshot() {
+        console.log('Starting full page screenshot capture');
+
+        try {
+            const originalScrollPos = window.scrollY;
+            const originalOverflow = document.documentElement.style.overflow;
+            const originalStyle = document.body.style.cssText;
+            
+            // Disable smooth scrolling and hide scrollbars
+            document.documentElement.style.scrollBehavior = 'auto';
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            
+            // Calculate accurate dimensions
+            const totalHeight = Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight,
+                document.documentElement.offsetHeight,
+                document.documentElement.clientHeight
+            );
+            const viewportHeight = window.innerHeight;
+            const totalWidth = Math.max(
+                document.documentElement.scrollWidth,
+                document.body.scrollWidth,
+                document.documentElement.offsetWidth,
+                document.documentElement.clientWidth
+            );
+            
+            const screenshots = [];
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const overlap = 50; // Pixels of overlap between screenshots
+
+            // Take screenshots
+            for (let scrollY = 0; scrollY < totalHeight; scrollY += (viewportHeight - overlap)) {
+                // Ensure we don't scroll past the bottom
+                const currentScrollY = Math.min(scrollY, totalHeight - viewportHeight);
+                window.scrollTo(0, currentScrollY);
+                
+                // Wait for any dynamic content and scrolling to settle
+                await new Promise(resolve => setTimeout(resolve, 250));
+
+                try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        chrome.runtime.sendMessage({
+                            action: 'captureFullPage'
+                        }, response => {
+                            if (chrome.runtime.lastError || response.error) {
+                                reject(chrome.runtime.lastError || response.error);
+                            } else {
+                                resolve(response.dataUrl);
+                            }
+                        });
+                    });
+
+                    screenshots.push({
+                        dataUrl,
+                        scrollY: currentScrollY,
+                        height: viewportHeight,
+                        width: totalWidth,
+                        isLastPart: (currentScrollY + viewportHeight >= totalHeight)
+                    });
+                } catch (error) {
+                    console.error('Error capturing viewport:', error);
+                }
+            }
+
+            // Restore original state
+            document.documentElement.style.scrollBehavior = '';
+            document.documentElement.style.overflow = originalOverflow;
+            document.body.style.cssText = originalStyle;
+            window.scrollTo(0, originalScrollPos);
+
+            if (screenshots.length > 0) {
+                chrome.runtime.sendMessage({
+                    action: 'processFullPageScreenshot',
+                    screenshots: screenshots,
+                    dimensions: {
+                        totalWidth,
+                        totalHeight,
+                        viewportHeight,
+                        devicePixelRatio,
+                        overlap
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Full page screenshot error:', error);
+            // Restore original state
+            document.documentElement.style.overflow = '';
+            document.body.style.cssText = originalStyle;
+            window.scrollTo(0, originalScrollPos);
         }
     }
 
@@ -49,35 +140,6 @@
 
         selectionOverlay.appendChild(selectionRect);
         document.body.appendChild(selectionOverlay);
-    }
-
-    function captureNodeScreenshot(e) {
-        // Prevent default keyboard shortcut behavior
-        if (e && e.preventDefault) {
-            e.preventDefault();
-        }
-
-        // Double-check capture mode before taking screenshot
-        chrome.storage.sync.get('captureMode', (data) => {
-            const currentMode = data.captureMode || 'elementCapture';
-
-            if (currentMode === 'fullPage') {
-                // Full page capture logic
-                try {
-                    chrome.runtime.sendMessage({
-                        action: 'captureFullPage'
-                    });
-                } catch (error) {
-                    console.error('Error sending screenshot message:', error);
-                }
-            } else {
-                // Element capture mode
-                if (selectionOverlay) {
-                    selectionOverlay.style.display = 'block';
-                    selectionRect.style.display = 'none';
-                }
-            }
-        });
     }
 
     function initElementSelectionListeners() {
@@ -149,6 +211,33 @@
                 selectionOverlay.style.display = 'none';
                 selectionRect.style.display = 'none';
                 isDrawing = false;
+            }
+        });
+    }
+
+    function captureNodeScreenshot(e) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+
+        chrome.storage.sync.get('captureMode', (data) => {
+            const currentMode = data.captureMode || 'elementCapture';
+
+            switch (currentMode) {
+                case 'fullPageCapture':
+                    captureFullPageScreenshot();
+                    break;
+                case 'windowCapture':
+                    chrome.runtime.sendMessage({
+                        action: 'captureFullPage',
+                        isWindowCapture: true
+                    });
+                    break;
+                default: // elementCapture
+                    if (selectionOverlay) {
+                        selectionOverlay.style.display = 'block';
+                        selectionRect.style.display = 'none';
+                    }
             }
         });
     }
